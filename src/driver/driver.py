@@ -3,7 +3,7 @@ import time
 print("debugger started")
 debugpy.listen(("localhost", 5678))
 print("listening to external")
-breakpoint()
+debugpy.wait_for_client()  # blocks execution until client is attached
 print("connected")
 counter = 0
 while True:
