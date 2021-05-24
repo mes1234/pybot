@@ -1,0 +1,33 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "transfer",
+            "type": "shell",
+            "command": "scp -r ./src  ${env:RPIADDR}:${env:RPISRC}"
+        },
+        {
+            "label": "kill",
+            "type": "shell",
+            "command": "ssh ${env:RPIADDR} \"if pgrep python; then pkill python; fi\""
+        }
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "ssh ${env:RPIADDR} rm -rf {env:RPISRC}"
+        },
+        {
+            "label": "start-debugger",
+            "type": "shell",
+            "command": "ssh ${env:RPIADDR} \"cd ${env:RPISRC} ; source ./rpi/bin/activate ; nohup python3 ./src/main.py ; exit \"",
+            "dependsOrder": "sequence",
+            "dependsOn" :[
+                "kill",
+                "clean",
+                "transfer"
+            ],
+        }
+    ]
+}
