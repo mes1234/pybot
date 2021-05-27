@@ -22,17 +22,17 @@ class EventBus:
         await self._nc.connect(self._address,self._loop)
 
 
-    async def subscribe(self, topic: str, handler: Callable) -> None:
-        sid = await self._nc.subscribe(topic,cb=self._handler_dispatcher(handler))
+    async def subscribe(self, topic: str, handler: Callable, queue: asyncio.Queue) -> None:
+        sid = await self._nc.subscribe(topic,cb=self._handler_dispatcher(handler,queue))
         self._subscribers.append(sid)
 
 
-    def _handler_dispatcher(self,handler):
+    def _handler_dispatcher(self,handler,queue: asyncio.Queue):
         async def _handler(msg):
             subject = msg.subject
             reply = msg.reply
             data = msg.data.decode()
             print("Received a message on '{subject} {reply}': {data}".format(
             subject=subject, reply=reply, data=data))
-            handler(data)
+            handler(data,queue)
         return _handler

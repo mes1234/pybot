@@ -1,36 +1,33 @@
 import asyncio
 from asyncio.events import AbstractEventLoop
+from asyncio.tasks import create_task
 import time
-from  driver.driver import start_debugger
-from  eventbus.loop import EventBus
+from driver.driver import start_debugger
+from eventbus.loop import EventBus
 
-def handler(msg):
-    print(f"this is {msg}")
 
-async def blabl():
+def handler(msg,queue:asyncio.Queue):
+    queue.put_nowait(msg)
+
+
+async def blabl(queue: asyncio.Queue):
     while(True):
-        print("blalbl")
+        msg = await queue.get()
+        print(msg)
         await asyncio.sleep(1)
 
-async def run(topic:str):
+
+async def run(topic: str, queue: asyncio.Queue):
     eb = EventBus("raspberrypi.local:4222")
     await eb.connect()
-    await eb.subscribe(topic,handler=handler)
+    await eb.subscribe(topic, handler=handler, queue=queue)
     while(True):
         await asyncio.sleep(1)
 
+
+async def main():
+    queue = asyncio.Queue()
+    tasks = await asyncio.gather(run("DEMO1",queue), blabl(queue))
+
 if __name__ == "__main__":
-
-
-    
-    loop = asyncio.get_event_loop()
-    tasks = []
-    tasks.append(asyncio.ensure_future(run("DEM1")))
-    tasks.append(asyncio.ensure_future(blabl()))
-    # tasks.append(asyncio.ensure_future(run("DEM2")))
-    # tasks.append(asyncio.ensure_future(run("DEM3")))
-    loop.run_until_complete(asyncio.wait(tasks))
-    
-    loop.close()
-
-    # start_debugger()
+    asyncio.run(main())
