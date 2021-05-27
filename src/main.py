@@ -1,33 +1,24 @@
 import asyncio
-from asyncio.events import AbstractEventLoop
-from asyncio.tasks import create_task
-import time
-from driver.driver import start_debugger
-from eventbus.loop import EventBus
+import logging
+from eventbus.event_bus import run_eventbus
+from driver.motor_driver import run_motor
 
-
-def handler(msg,queue:asyncio.Queue):
-    queue.put_nowait(msg)
-
-
-async def blabl(queue: asyncio.Queue):
-    while(True):
-        msg = await queue.get()
-        print(msg)
-        await asyncio.sleep(1)
-
-
-async def run(topic: str, queue: asyncio.Queue):
-    eb = EventBus("raspberrypi.local:4222")
-    await eb.connect()
-    await eb.subscribe(topic, handler=handler, queue=queue)
-    while(True):
-        await asyncio.sleep(1)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("debug.log"),
+        logging.StreamHandler()
+    ]
+)
 
 
 async def main():
-    queue = asyncio.Queue()
-    tasks = await asyncio.gather(run("DEMO1",queue), blabl(queue))
+    communication_bus = asyncio.Queue()
+    tasks = await asyncio.gather(
+        run_eventbus(address="raspberrypi.local:4222",
+                     topic="DEMO1", queue=communication_bus),
+        run_motor(queue=communication_bus))
 
 if __name__ == "__main__":
     asyncio.run(main())
