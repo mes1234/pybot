@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from eventbus.event_bus import run_eventbus
-from driver.motor_driver import run_motor
+from driver.runner import run_motor
 
 logging.basicConfig(
     level=logging.INFO,

@@ -1,13 +1,15 @@
-import debugpy
-import time
+import logging
 
-def start_debugger():
-    print("debugger started")
-    debugpy.listen(("0.0.0.0", 5678))
-    print("listening to external")
-    debugpy.wait_for_client()  # blocks execution until client is attached
-    print("connected")
-    counter = 0
-    while True:
-        time.sleep(1)
-        print(f"yello {counter}")
+
+class Driver:
+    current = 0
+
+    def __init__(self) -> None:
+        pass
+
+    def send_new_settings(self, point: int):
+        if self.current != point:
+            logging.info(f"Sent to device :{point}")
+        else:
+            logging.info(f"Not needed update :{point}")
+        self.current = point

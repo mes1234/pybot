@@ -7,14 +7,14 @@ from nats.aio.client import Client as NATS
 from nats.aio.errors import ErrConnectionClosed, ErrTimeout, ErrNoServers
 
 from msg.motor_command import MotorAction
+from common.sleeper import SLEEP
 
 
 async def run_eventbus(address: str, topic: str, queue: asyncio.Queue):
     eb = EventBus(address=address)
     await eb.connect()
     await eb.subscribe(topic, queue=queue)
-    while(True):
-        await asyncio.sleep(1)
+    await asyncio.sleep(SLEEP)
 
 
 class EventBus:
